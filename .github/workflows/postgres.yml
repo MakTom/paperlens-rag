@@ -1,0 +1,51 @@
+name: PostgreSQL checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RAG_DB_HOST: 127.0.0.1
+      RAG_DB_PORT: "55432"
+      RAG_DB_USER: paperlens
+      RAG_DB_PASSWORD: paperlens_local_only
+      RAG_DB_NAME: paperlens
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: paperlens
+          POSTGRES_PASSWORD: paperlens_local_only
+          POSTGRES_DB: paperlens
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U paperlens -d paperlens"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked --dev
+      - run: uv run --locked ruff check src scripts tests migrations
+      - name: Migrate a fresh PostgreSQL database
+        run: uv run --locked alembic upgrade head
+      - name: Confirm migration rerun is safe
+        run: uv run --locked alembic upgrade head
+      - name: Verify model and migration agree
+        run: uv run --locked alembic check
+      - name: Verify idempotency and transaction rollback
+        run: uv run --locked python -m scripts.verify_day3
+      - name: Inspect database
+        run: uv run --locked python -m scripts.check_db
+
