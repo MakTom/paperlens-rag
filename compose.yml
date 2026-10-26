@@ -18,5 +18,28 @@ services:
       retries: 12
       start_period: 10s
 
+  opensearch:
+    image: opensearchproject/opensearch:2.19.0
+    environment:
+      discovery.type: single-node
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+    ports:
+      - "127.0.0.1:${RAG_SEARCH_PORT:-59200}:9200"
+    volumes:
+      - paperlens_opensearch_data:/usr/share/opensearch/data
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' | grep -Eq '\"status\":\"(green|yellow)\"'"]
+      interval: 10s
+      timeout: 8s
+      retries: 24
+      start_period: 30s
+
 volumes:
   paperlens_postgres_data:
+  paperlens_opensearch_data:

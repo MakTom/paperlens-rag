@@ -10,7 +10,7 @@ def test_health_is_api_liveness_only(client):
     assert response.json() == {
         "status": "ok",
         "app_name": "paperlens-test",
-        "version": "0.2.0",
+        "version": "0.4.0",
         "scope": "api_only",
     }
 

@@ -1,0 +1,33 @@
+name: Search integration checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked --dev
+      - name: Configure Linux runner for OpenSearch
+        run: sudo sysctl -w vm.max_map_count=262144
+      - name: Start database and search
+        run: docker compose up -d --wait postgres opensearch
+      - name: Migrate and seed canonical records
+        run: |
+          uv run --locked alembic upgrade head
+          uv run --locked python -m scripts.seed_papers
+      - name: Check indexing and known-paper retrieval
+        run: uv run --locked python -m scripts.verify_day4
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs --tail=100 postgres opensearch
+      - name: Stop test containers
+        if: always()
+        run: docker compose down
+
