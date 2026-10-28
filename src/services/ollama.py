@@ -9,16 +9,18 @@ class ModelServiceError(RuntimeError):
 
 
 class OllamaClient:
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, *, transport=None):
         self.settings = settings
+        self.transport = transport
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str, *, system: str | None = None) -> str:
         if not prompt.strip():
             raise ValueError("Prompt must not be empty.")
         endpoint = str(self.settings.ollama_base_url).rstrip("/") + "/api/generate"
         try:
             with httpx.Client(
                 timeout=httpx.Timeout(self.settings.request_timeout_seconds, connect=5),
+                transport=self.transport,
                 trust_env=False,  # Connect directly to the configured Ollama server.
             ) as client:
                 response = client.post(
@@ -26,8 +28,9 @@ class OllamaClient:
                     json={
                         "model": self.settings.ollama_model,
                         "prompt": prompt,
+                        **({"system": system} if system else {}),
                         "stream": False,
-                        "options": {"temperature": 0, "num_predict": 80},
+                        "options": {"temperature": 0, "num_predict": 256, "num_ctx": 8192},
                     },
                 )
                 if response.status_code == 404:
@@ -58,6 +61,8 @@ class OllamaClient:
 
         if not isinstance(payload, dict):
             raise ModelServiceError("Expected an Ollama JSON object.")
+        if payload.get("done_reason") == "length":
+            raise ModelServiceError("Generation reached its output limit; try a narrower question.")
         answer = payload.get("response")
         if payload.get("error") or payload.get("done") is not True:
             raise ModelServiceError("Ollama did not report a completed generation.")

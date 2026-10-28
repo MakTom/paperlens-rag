@@ -1,0 +1,6 @@
+[
+  {"id":"dpr", "query":"How does Dense Passage Retrieval represent questions and passages?", "expected_arxiv_id":"2004.04906"},
+  {"id":"bart", "query":"What does BART reconstruct during pretraining?", "expected_arxiv_id":"1910.13461"},
+  {"id":"transformer", "query":"What does Attention Is All You Need use instead of recurrent layers?", "expected_arxiv_id":"1706.03762"},
+  {"id":"no-match", "query":"zzzxqvnonexistentfixturetoken", "expected_status":"no_evidence"}
+]

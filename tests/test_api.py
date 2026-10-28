@@ -10,15 +10,9 @@ def test_health_is_api_liveness_only(client):
     assert response.json() == {
         "status": "ok",
         "app_name": "paperlens-test",
-        "version": "0.4.0",
+        "version": "0.5.0",
         "scope": "api_only",
     }
-
-
-def test_valid_question_explicitly_not_implemented(client):
-    response = client.post("/api/v1/ask", json={"query": "What is RAG?"})
-    assert response.status_code == 501
-    assert "Day 5" in response.json()["detail"]
 
 
 @pytest.mark.parametrize("body", [

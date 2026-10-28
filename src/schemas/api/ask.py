@@ -1,4 +1,4 @@
-"""Define the future RAG contract before wiring retrieval and generation."""
+"""Public RAG request, answer and evidence contracts."""
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
@@ -17,9 +17,22 @@ class AskRequest(BaseModel):
     model: NonBlankText | None = None
 
 
+class Evidence(BaseModel):
+    citation_id: str
+    arxiv_id: str
+    title: str
+    source_url: str
+    text_kind: Literal["authored_summary", "source_abstract"]
+    excerpt: str
+    truncated: bool
+
+
 class AskResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    status: Literal["answered", "no_evidence", "insufficient_evidence", "invalid_citations"] = "answered"
+    evidence: list[Evidence] = Field(default_factory=list)
+    cited_ids: list[str] = Field(default_factory=list)
     query: NonBlankText
     answer: NonBlankText
     sources: list[str] = Field(default_factory=list)
