@@ -1,0 +1,236 @@
+{
+  "dataset_version": "paperlens-eval-v1",
+  "corpus_version": "authored-summaries-v1",
+  "corpus_sha256": "6ca4301e7cd04efd1960c4c936ca9c22874bf0be51d8e2679254d1493dad86fe",
+  "cases": [
+    {
+      "id": "dev-01",
+      "split": "dev",
+      "query": "How does Dense Passage Retrieval represent questions and passages?",
+      "supported": true,
+      "kind": "direct",
+      "relevant_paper_ids": [
+        "2004.04906"
+      ],
+      "expected_answer_points": [
+        "It learns vector representations of questions and passages.",
+        "It uses two encoders."
+      ],
+      "categories": [],
+      "evidence": [
+        {
+          "arxiv_id": "2004.04906",
+          "passage": "Dense Passage Retrieval learns vector representations of questions and passages using two encoders. Retrieval selects passages that are useful for answering a question, providing an alternative to lexical matching such as BM25. The paper evaluates retrieval accuracy and downstream open-domain question answering."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "dev-02",
+      "split": "dev",
+      "query": "What does BART learn to reconstruct during pretraining?",
+      "supported": true,
+      "kind": "direct",
+      "relevant_paper_ids": [
+        "1910.13461"
+      ],
+      "expected_answer_points": [
+        "It reconstructs text after corruption."
+      ],
+      "categories": [],
+      "evidence": [
+        {
+          "arxiv_id": "1910.13461",
+          "passage": "BART learns to reconstruct text after it has been corrupted. It combines a bidirectional encoder with a left-to-right decoder. The paper compares corruption strategies, including span masking and sentence reordering, and evaluates the pretrained model on text generation and language-understanding tasks."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "dev-03",
+      "split": "dev",
+      "query": "What does Attention Is All You Need use instead of recurrent or convolutional layers?",
+      "supported": true,
+      "kind": "direct",
+      "relevant_paper_ids": [
+        "1706.03762"
+      ],
+      "expected_answer_points": [
+        "The proposed Transformer architecture uses attention."
+      ],
+      "categories": [],
+      "evidence": [
+        {
+          "arxiv_id": "1706.03762",
+          "passage": "The Transformer uses attention to process sequences without recurrent or convolutional layers in its proposed architecture. Its encoder-decoder design supports machine translation while enabling more parallel computation during training. The paper evaluates translation quality and also investigates constituency parsing."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "dev-04",
+      "split": "dev",
+      "query": "How does BERT use the words surrounding a word?",
+      "supported": true,
+      "kind": "paraphrase",
+      "relevant_paper_ids": [
+        "1810.04805"
+      ],
+      "expected_answer_points": [
+        "Its contextual representations consider information on both sides of a word."
+      ],
+      "categories": [],
+      "evidence": [
+        {
+          "arxiv_id": "1810.04805",
+          "passage": "BERT learns contextual text representations by considering information on both sides of a word. Pretrained representations can be adapted to tasks such as question answering and language inference with relatively small task-specific additions. The paper evaluates this transfer across multiple language-understanding benchmarks."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "dev-05",
+      "split": "dev",
+      "query": "In Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks, where do the retrieved passages come from?",
+      "supported": true,
+      "kind": "filtered",
+      "relevant_paper_ids": [
+        "2005.11401"
+      ],
+      "expected_answer_points": [
+        "The supplied summary identifies Wikipedia as the passage source."
+      ],
+      "categories": [
+        "cs.CL"
+      ],
+      "evidence": [
+        {
+          "arxiv_id": "2005.11401",
+          "passage": "This work combines a sequence-to-sequence language model with retrieved Wikipedia passages. A dense index provides external evidence alongside knowledge stored in model parameters. It compares retrieval shared across an answer with retrieval that can vary by generated token, evaluating knowledge-intensive question answering and generation."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "dev-06",
+      "split": "dev",
+      "query": "How do Dense Passage Retrieval and Retrieval-Augmented Generation use external passages?",
+      "supported": true,
+      "kind": "multi_source",
+      "relevant_paper_ids": [
+        "2004.04906",
+        "2005.11401"
+      ],
+      "expected_answer_points": [
+        "DPR uses two encoders to retrieve passages useful for answering a question.",
+        "RAG combines a sequence-to-sequence model with retrieved Wikipedia passages."
+      ],
+      "categories": [],
+      "evidence": [
+        {
+          "arxiv_id": "2004.04906",
+          "passage": "Dense Passage Retrieval learns vector representations of questions and passages using two encoders. Retrieval selects passages that are useful for answering a question, providing an alternative to lexical matching such as BM25. The paper evaluates retrieval accuracy and downstream open-domain question answering."
+        },
+        {
+          "arxiv_id": "2005.11401",
+          "passage": "This work combines a sequence-to-sequence language model with retrieved Wikipedia passages. A dense index provides external evidence alongside knowledge stored in model parameters. It compares retrieval shared across an answer with retrieval that can vary by generated token, evaluating knowledge-intensive question answering and generation."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "dev-07",
+      "split": "dev",
+      "query": "What exact benchmark score did BART achieve?",
+      "supported": false,
+      "kind": "unsupported",
+      "relevant_paper_ids": [],
+      "expected_answer_points": [],
+      "categories": [],
+      "evidence": [],
+      "unsupported_reason": "The BART summary contains no exact benchmark scores."
+    },
+    {
+      "id": "dev-08",
+      "split": "dev",
+      "query": "What is the current weather in Toronto?",
+      "supported": false,
+      "kind": "unsupported",
+      "relevant_paper_ids": [],
+      "expected_answer_points": [],
+      "categories": [],
+      "evidence": [],
+      "unsupported_reason": "No fixture contains current weather information."
+    },
+    {
+      "id": "holdout-01",
+      "split": "holdout",
+      "query": "Which corruption strategies are mentioned for BART pretraining?",
+      "supported": true,
+      "kind": "direct",
+      "relevant_paper_ids": [
+        "1910.13461"
+      ],
+      "expected_answer_points": [
+        "Span masking and sentence reordering."
+      ],
+      "categories": [],
+      "evidence": [
+        {
+          "arxiv_id": "1910.13461",
+          "passage": "BART learns to reconstruct text after it has been corrupted. It combines a bidirectional encoder with a left-to-right decoder. The paper compares corruption strategies, including span masking and sentence reordering, and evaluates the pretrained model on text generation and language-understanding tasks."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "holdout-02",
+      "split": "holdout",
+      "query": "Which BERT adaptation tasks are named in the summary?",
+      "supported": true,
+      "kind": "filtered",
+      "relevant_paper_ids": [
+        "1810.04805"
+      ],
+      "expected_answer_points": [
+        "Question answering and language inference."
+      ],
+      "categories": [
+        "cs.CL"
+      ],
+      "evidence": [
+        {
+          "arxiv_id": "1810.04805",
+          "passage": "BERT learns contextual text representations by considering information on both sides of a word. Pretrained representations can be adapted to tasks such as question answering and language inference with relatively small task-specific additions. The paper evaluates this transfer across multiple language-understanding benchmarks."
+        }
+      ],
+      "unsupported_reason": null
+    },
+    {
+      "id": "holdout-03",
+      "split": "holdout",
+      "query": "How many parameters does BERT have?",
+      "supported": false,
+      "kind": "unsupported",
+      "relevant_paper_ids": [],
+      "expected_answer_points": [],
+      "categories": [],
+      "evidence": [],
+      "unsupported_reason": "The BERT summary does not contain parameter counts."
+    },
+    {
+      "id": "holdout-04",
+      "split": "holdout",
+      "query": "How does Dense Passage Retrieval encode passages?",
+      "supported": false,
+      "kind": "filtered",
+      "relevant_paper_ids": [],
+      "expected_answer_points": [],
+      "categories": [
+        "no.such.category"
+      ],
+      "evidence": [],
+      "unsupported_reason": "The category constraint excludes all fixture records, so no answer is supported within the allowed corpus."
+    }
+  ]
+}

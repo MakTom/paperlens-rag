@@ -9,4 +9,4 @@ router = APIRouter(tags=["health"])
 @router.get("/health", response_model=HealthResponse)
 def health(settings: SettingsDep) -> HealthResponse:
     """Liveness only: does not test Ollama, retrieval or databases."""
-    return HealthResponse(app_name=settings.app_name, version="0.5.0")
+    return HealthResponse(app_name=settings.app_name, version="0.6.0")
