@@ -10,8 +10,8 @@ from src.routers.search import router as search_router
 def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(
         title="PaperLens API",
-        version="0.6.0",
-        description="Day 6: evaluated BM25 RAG baseline.",
+        version="0.7.0",
+        description="Day 7: stabilized Week 1 RAG baseline.",
     )
     app.state.settings = settings if settings is not None else Settings()
     app.include_router(health_router, prefix="/api/v1")

@@ -15,6 +15,24 @@ class SearchServiceError(RuntimeError):
     """Actionable error without raw remote response bodies."""
 
 
+def require_object(value) -> dict:
+    if not isinstance(value, dict):
+        raise SearchServiceError("OpenSearch returned an invalid nested response object.")
+    return value
+
+
+def nonnegative_integer(value) -> int:
+    if type(value) is not int or value < 0:
+        raise SearchServiceError("OpenSearch returned an invalid integer field.")
+    return value
+
+
+def check_shards(data):
+    shards = require_object(data.get("_shards"))
+    if nonnegative_integer(shards.get("failed")) != 0:
+        raise SearchServiceError("OpenSearch reported shard failures.")
+
+
 class SearchClient:
     def __init__(self, settings: SearchSettings | None = None, *, transport=None):
         self.settings = settings or SearchSettings()
@@ -65,10 +83,10 @@ class SearchClient:
         elif response.status_code != 200:
             raise SearchServiceError(f"Index check returned HTTP {response.status_code}.")
         data = self._request("GET", f"{self.settings.index}/_mapping")
-        version = (
-            data.get(self.settings.index, {}).get("mappings", {})
-            .get("_meta", {}).get("schema_version")
-        )
+        index = require_object(data.get(self.settings.index, {}))
+        mappings = require_object(index.get("mappings", {}))
+        metadata = require_object(mappings.get("_meta", {}))
+        version = metadata.get("schema_version")
         if version != SCHEMA_VERSION:
             raise SearchServiceError("Existing index has a different schema; choose a new index name.")
 
@@ -86,12 +104,14 @@ class SearchClient:
         items = data.get("items", [])
         if not isinstance(items, list) or len(items) != len(papers):
             raise SearchServiceError("Bulk response does not account for every submitted paper.")
-        failed = [
-            paper.arxiv_id for paper, item in zip(papers, items)
-            if not isinstance(item, dict)
-            or item.get("index", {}).get("status") not in (200, 201)
-            or item.get("index", {}).get("error")
-        ]
+        failed = []
+        for paper, item in zip(papers, items):
+            operation = item.get("index") if isinstance(item, dict) else None
+            if (not isinstance(operation, dict)
+                    or type(operation.get("status")) is not int
+                    or operation["status"] not in (200, 201)
+                    or operation.get("error")):
+                failed.append(paper.arxiv_id)
         if failed or data.get("errors") is not False:
             raise SearchServiceError(
                 "Some records may have been indexed. Retry after resolving errors. "
@@ -101,13 +121,11 @@ class SearchClient:
 
     def refresh(self):
         data = self._request("POST", f"{self.settings.index}/_refresh")
-        if data.get("_shards", {}).get("failed", 0):
-            raise SearchServiceError("Index refresh reported shard failures.")
+        check_shards(data)
 
     def count(self) -> int:
         data = self._request("GET", f"{self.settings.index}/_count")
-        if data.get("_shards", {}).get("failed", 0):
-            raise SearchServiceError("Count reported shard failures.")
+        check_shards(data)
         count = data.get("count")
         if type(count) is not int or count < 0:
             raise SearchServiceError("Invalid document count.")
@@ -118,16 +136,27 @@ class SearchClient:
             "POST", f"{self.settings.index}/_search", json=build_query(request),
             params={"allow_partial_search_results": "false"},
         )
-        if data.get("timed_out") or data.get("_shards", {}).get("failed", 0):
-            raise SearchServiceError("OpenSearch could not return a complete search result.")
+        check_shards(data)
+        if data.get("timed_out") is not False:
+            raise SearchServiceError("OpenSearch did not report a completed search.")
+        hit_block = require_object(data.get("hits"))
+        total = require_object(hit_block.get("total"))
+        total_value = nonnegative_integer(total.get("value"))
+        took = nonnegative_integer(data.get("took"))
+        raw_hits = hit_block.get("hits")
+        if total.get("relation") != "eq" or not isinstance(raw_hits, list):
+            raise SearchServiceError("OpenSearch returned incomplete search totals or hits.")
+        if len(raw_hits) > request.top_k or len(raw_hits) != min(total_value, request.top_k):
+            raise SearchServiceError("OpenSearch returned inconsistent hit counts.")
         try:
-            hits = [
-                SearchHit(**hit["_source"], score=hit["_score"])
-                for hit in data["hits"]["hits"]
-            ]
-            return SearchResponse(
-                query=request.query, total=data["hits"]["total"]["value"],
-                took_ms=data["took"], hits=hits,
-            )
-        except (KeyError, TypeError, ValidationError) as exc:
+            hits = []
+            for hit in raw_hits:
+                hit = require_object(hit)
+                source = require_object(hit.get("_source"))
+                score = hit.get("_score")
+                if type(score) not in (float, int):
+                    raise SearchServiceError("OpenSearch returned an invalid relevance score.")
+                hits.append(SearchHit(**source, score=score))
+            return SearchResponse(query=request.query, total=total_value, took_ms=took, hits=hits)
+        except (TypeError, ValidationError) as exc:
             raise SearchServiceError("Search results do not match the expected paper schema.") from exc

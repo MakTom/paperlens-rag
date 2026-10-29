@@ -18,7 +18,5 @@ jobs:
           python-version: "3.12"
       - name: Install locked dependencies
         run: uv sync --locked --dev
-      - name: Lint
-        run: uv run --locked ruff check src scripts tests
-      - name: Test without model services
-        run: uv run --locked pytest -q
+      - name: Offline Week 1 checks (same command as local)
+        run: make check
