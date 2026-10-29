@@ -76,7 +76,7 @@ def main():
             "split": args.split, "mode": "retrieval_only" if args.retrieval_only else "rag",
             "dataset_version": dataset.dataset_version, "dataset_sha256": fingerprint(dataset.model_dump()),
             "corpus_version": dataset.corpus_version, "index_snapshot": before,
-            "prompt_sha256": fingerprint(SYSTEM_PROMPT), "prompt_version": "day5-v1",
+            "prompt_sha256": fingerprint(SYSTEM_PROMPT), "prompt_version": "day7-v2",
             "model": identity, "generation_options": {"temperature": 0, "num_predict": 256, "num_ctx": 8192},
             "model_timeout_seconds": settings.request_timeout_seconds,
             "search_timeout_seconds": search_settings.timeout_seconds,
